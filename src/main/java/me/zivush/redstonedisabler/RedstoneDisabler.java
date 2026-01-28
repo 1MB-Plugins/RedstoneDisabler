@@ -2,7 +2,9 @@ package me.zivush.redstonedisabler;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.bukkit.ChatColor;
+import java.util.Objects;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -24,11 +26,12 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NonNull;
 
 public class RedstoneDisabler extends JavaPlugin implements Listener {
 
     private Map<String, Boolean> disabledComponents;
-    private String disabledMessage;
+    private Component disabledMessage;
     private boolean debug;
 
     @Override
@@ -63,7 +66,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
 
         // Load disabled components from config
         if (config.contains("disabled-components")) {
-            for (String key : config.getConfigurationSection("disabled-components").getKeys(false)) {
+            for (String key : Objects.requireNonNull(config.getConfigurationSection("disabled-components")).getKeys(false)) {
                 boolean isDisabled = config.getBoolean("disabled-components." + key);
                 disabledComponents.put(key, isDisabled);
 
@@ -75,12 +78,8 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
 
         // Load disabled message
         String configMessage = config.getString("disabled-message", "");
-        if (configMessage != null && !configMessage.isEmpty()) {
-            disabledMessage = ChatColor.translateAlternateColorCodes('&', configMessage);
-        } else {
-            disabledMessage = null;
-        }
-
+        if (!configMessage.isEmpty()) disabledMessage = Component.text().append(Component.text(configMessage.replace("&", "§"))).color(NamedTextColor.WHITE).build();
+        else disabledMessage = null;
         // Load debug setting
         debug = config.getBoolean("debug", false);
 
@@ -94,7 +93,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles the redstone event to prevent disabled components from activating
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onRedstoneEvent(BlockRedstoneEvent event) {
+    public void onRedstoneEvent(@NonNull BlockRedstoneEvent event) {
         Block block = event.getBlock();
         String materialName = block.getType().name();
 
@@ -113,7 +112,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles piston extension events
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPistonExtend(BlockPistonExtendEvent event) {
+    public void onPistonExtend(@NonNull BlockPistonExtendEvent event) {
         Block block = event.getBlock();
         if (isPistonDisabled(block.getType().name())) {
             event.setCancelled(true);
@@ -128,7 +127,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles piston retraction events
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPistonRetract(BlockPistonRetractEvent event) {
+    public void onPistonRetract(@NonNull BlockPistonRetractEvent event) {
         Block block = event.getBlock();
         if (isPistonDisabled(block.getType().name())) {
             event.setCancelled(true);
@@ -143,7 +142,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles hopper item movement
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onHopperMove(InventoryMoveItemEvent event) {
+    public void onHopperMove(@NonNull InventoryMoveItemEvent event) {
         // Check for regular hoppers
         if ((event.getSource().getHolder() instanceof org.bukkit.block.Hopper || event.getDestination().getHolder() instanceof org.bukkit.block.Hopper) && isComponentDisabled("HOPPER")) {
             event.setCancelled(true);
@@ -181,7 +180,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles TNT and other explosions
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onEntityExplode(EntityExplodeEvent event) {
+    public void onEntityExplode(@NonNull EntityExplodeEvent event) {
         if (event.getEntityType() == EntityType.TNT && isComponentDisabled("TNT")) {
             event.setCancelled(true);
             if (debug) {
@@ -199,7 +198,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles TNT ignition
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onBlockIgnite(BlockIgniteEvent event) {
+    public void onBlockIgnite(@NonNull BlockIgniteEvent event) {
         if (event.getBlock().getType() == Material.TNT && isComponentDisabled("TNT")) {
             event.setCancelled(true);
             if (debug) {
@@ -213,7 +212,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles detector rail activation
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onVehicleMove(VehicleMoveEvent event) {
+    public void onVehicleMove(@NonNull VehicleMoveEvent event) {
         // Check if the vehicle is moving onto a detector rail
         Block to = event.getTo().getBlock();
         if (to.getType().name().contains("DETECTOR_RAIL") && isComponentDisabled("DETECTOR_RAIL")) {
@@ -229,7 +228,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles dragon egg teleportation
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onBlockFromTo(BlockFromToEvent event) {
+    public void onBlockFromTo(@NonNull BlockFromToEvent event) {
         if (event.getBlock().getType() == Material.DRAGON_EGG && isComponentDisabled("DRAGON_EGG")) {
             event.setCancelled(true);
             if (debug) {
@@ -243,7 +242,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Handles player interaction with redstone components
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    public void onPlayerInteract(@NonNull PlayerInteractEvent event) {
         if (event.hasBlock() && event.getClickedBlock() != null) {
             Block block = event.getClickedBlock();
             String materialName = block.getType().name();
@@ -315,7 +314,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
     /**
      * Specifically checks if pistons are disabled
      */
-    private boolean isPistonDisabled(String materialName) {
+    private boolean isPistonDisabled(@NonNull String materialName) {
         if (materialName.contains("STICKY_PISTON") || materialName.equals("MOVING_PISTON")) {
             return disabledComponents.getOrDefault("STICKY_PISTON", false);
         } else if (materialName.contains("PISTON")) {
@@ -327,7 +326,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
     /**
      * Checks if a component can be directly activated by a player
      */
-    private boolean isDirectlyActivatableComponent(String materialName) {
+    private boolean isDirectlyActivatableComponent(@NonNull String materialName) {
         return materialName.contains("BUTTON") || materialName.contains("LEVER") || materialName.contains("PRESSURE_PLATE") || materialName.equals("TRIPWIRE_HOOK") || materialName.equals("DAYLIGHT_DETECTOR") || materialName.equals("TARGET") || materialName.endsWith("_DOOR") || materialName.endsWith("_TRAPDOOR") || materialName.endsWith("_FENCE_GATE") || materialName.equals("BELL") || materialName.equals("LECTERN") || materialName.equals("JUKEBOX") || materialName.equals("DRAGON_EGG") || materialName.equals("CAMPFIRE") || materialName.equals("SOUL_CAMPFIRE");
     }
 
@@ -335,17 +334,14 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Command handler for the plugin
      */
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
         if (command.getName().equalsIgnoreCase("redstonedisabler")) {
             if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
                 if (sender.hasPermission("redstonedisabler.reload")) {
                     loadConfiguration();
-                    sender.sendMessage(ChatColor.GREEN + "RedstoneDisabler configuration reloaded!");
-                    return true;
-                } else {
-                    sender.sendMessage(ChatColor.RED + "You don't have permission to use this command.");
-                    return true;
-                }
+                    sender.sendMessage(Component.text("RedstoneDisabler configuration reloaded!", NamedTextColor.GREEN));
+                } else sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
+                return true;
             }
             return false;
         }
