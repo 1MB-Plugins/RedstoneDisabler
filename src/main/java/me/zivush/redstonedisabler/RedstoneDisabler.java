@@ -1,34 +1,29 @@
 package me.zivush.redstonedisabler;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.minecart.HopperMinecart;
-import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
 
 public class RedstoneDisabler extends JavaPlugin implements Listener {
 
@@ -109,10 +104,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
             event.setNewCurrent(event.getOldCurrent());
 
             if (debug) {
-                getLogger().info("Blocked redstone activation for " + materialName + " at " +
-                        block.getLocation().getBlockX() + ", " +
-                        block.getLocation().getBlockY() + ", " +
-                        block.getLocation().getBlockZ());
+                getLogger().info("Blocked redstone activation for " + materialName + " at " + block.getLocation().getBlockX() + ", " + block.getLocation().getBlockY() + ", " + block.getLocation().getBlockZ());
             }
         }
     }
@@ -127,10 +119,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
             event.setCancelled(true);
 
             if (debug) {
-                getLogger().info("Blocked piston extension at " +
-                        block.getLocation().getBlockX() + ", " +
-                        block.getLocation().getBlockY() + ", " +
-                        block.getLocation().getBlockZ());
+                getLogger().info("Blocked piston extension at " + block.getLocation().getBlockX() + ", " + block.getLocation().getBlockY() + ", " + block.getLocation().getBlockZ());
             }
         }
     }
@@ -145,10 +134,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
             event.setCancelled(true);
 
             if (debug) {
-                getLogger().info("Blocked piston retraction at " +
-                        block.getLocation().getBlockX() + ", " +
-                        block.getLocation().getBlockY() + ", " +
-                        block.getLocation().getBlockZ());
+                getLogger().info("Blocked piston retraction at " + block.getLocation().getBlockX() + ", " + block.getLocation().getBlockY() + ", " + block.getLocation().getBlockZ());
             }
         }
     }
@@ -159,9 +145,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHopperMove(InventoryMoveItemEvent event) {
         // Check for regular hoppers
-        if ((event.getSource().getHolder() instanceof org.bukkit.block.Hopper ||
-                event.getDestination().getHolder() instanceof org.bukkit.block.Hopper) &&
-                isComponentDisabled("HOPPER")) {
+        if ((event.getSource().getHolder() instanceof org.bukkit.block.Hopper || event.getDestination().getHolder() instanceof org.bukkit.block.Hopper) && isComponentDisabled("HOPPER")) {
             event.setCancelled(true);
             if (debug) {
                 getLogger().info("Blocked hopper item movement");
@@ -170,9 +154,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
         }
 
         // Check for hopper minecarts
-        if ((event.getSource().getHolder() instanceof HopperMinecart ||
-                event.getDestination().getHolder() instanceof HopperMinecart) &&
-                isComponentDisabled("HOPPER_MINECART")) {
+        if ((event.getSource().getHolder() instanceof HopperMinecart || event.getDestination().getHolder() instanceof HopperMinecart) && isComponentDisabled("HOPPER_MINECART")) {
             event.setCancelled(true);
             if (debug) {
                 getLogger().info("Blocked hopper minecart item movement");
@@ -190,10 +172,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
 
             if (debug) {
                 Block block = event.getBlock();
-                getLogger().info("Blocked note block at " +
-                        block.getLocation().getBlockX() + ", " +
-                        block.getLocation().getBlockY() + ", " +
-                        block.getLocation().getBlockZ());
+                getLogger().info("Blocked note block at " + block.getLocation().getBlockX() + ", " + block.getLocation().getBlockY() + ", " + block.getLocation().getBlockZ());
             }
         }
     }
@@ -203,21 +182,15 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityExplode(EntityExplodeEvent event) {
-        if (event.getEntityType() == EntityType.PRIMED_TNT && isComponentDisabled("TNT")) {
+        if (event.getEntityType() == EntityType.TNT && isComponentDisabled("TNT")) {
             event.setCancelled(true);
             if (debug) {
-                getLogger().info("Blocked TNT explosion at " +
-                        event.getLocation().getBlockX() + ", " +
-                        event.getLocation().getBlockY() + ", " +
-                        event.getLocation().getBlockZ());
+                getLogger().info("Blocked TNT explosion at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ());
             }
-        } else if (event.getEntityType() == EntityType.MINECART_TNT && isComponentDisabled("TNT_MINECART")) {
+        } else if (event.getEntityType() == EntityType.TNT_MINECART && isComponentDisabled("TNT_MINECART")) {
             event.setCancelled(true);
             if (debug) {
-                getLogger().info("Blocked TNT minecart explosion at " +
-                        event.getLocation().getBlockX() + ", " +
-                        event.getLocation().getBlockY() + ", " +
-                        event.getLocation().getBlockZ());
+                getLogger().info("Blocked TNT minecart explosion at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ());
             }
         }
     }
@@ -231,10 +204,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
             event.setCancelled(true);
             if (debug) {
                 Block block = event.getBlock();
-                getLogger().info("Blocked TNT ignition at " +
-                        block.getLocation().getBlockX() + ", " +
-                        block.getLocation().getBlockY() + ", " +
-                        block.getLocation().getBlockZ());
+                getLogger().info("Blocked TNT ignition at " + block.getLocation().getBlockX() + ", " + block.getLocation().getBlockY() + ", " + block.getLocation().getBlockZ());
             }
         }
     }
@@ -250,10 +220,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
             // We can't cancel the event directly, but we can teleport the vehicle back
             event.getVehicle().teleport(event.getFrom());
             if (debug) {
-                getLogger().info("Blocked vehicle movement over detector rail at " +
-                        to.getLocation().getBlockX() + ", " +
-                        to.getLocation().getBlockY() + ", " +
-                        to.getLocation().getBlockZ());
+                getLogger().info("Blocked vehicle movement over detector rail at " + to.getLocation().getBlockX() + ", " + to.getLocation().getBlockY() + ", " + to.getLocation().getBlockZ());
             }
         }
     }
@@ -267,10 +234,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
             event.setCancelled(true);
             if (debug) {
                 Block block = event.getBlock();
-                getLogger().info("Blocked dragon egg teleportation at " +
-                        block.getLocation().getBlockX() + ", " +
-                        block.getLocation().getBlockY() + ", " +
-                        block.getLocation().getBlockZ());
+                getLogger().info("Blocked dragon egg teleportation at " + block.getLocation().getBlockX() + ", " + block.getLocation().getBlockY() + ", " + block.getLocation().getBlockZ());
             }
         }
     }
@@ -295,11 +259,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
                 }
 
                 if (debug) {
-                    getLogger().info("Blocked player interaction with " + materialName + " by " +
-                            event.getPlayer().getName() + " at " +
-                            block.getLocation().getBlockX() + ", " +
-                            block.getLocation().getBlockY() + ", " +
-                            block.getLocation().getBlockZ());
+                    getLogger().info("Blocked player interaction with " + materialName + " by " + event.getPlayer().getName() + " at " + block.getLocation().getBlockX() + ", " + block.getLocation().getBlockY() + ", " + block.getLocation().getBlockZ());
                 }
             }
         }
@@ -368,21 +328,7 @@ public class RedstoneDisabler extends JavaPlugin implements Listener {
      * Checks if a component can be directly activated by a player
      */
     private boolean isDirectlyActivatableComponent(String materialName) {
-        return materialName.contains("BUTTON") ||
-                materialName.contains("LEVER") ||
-                materialName.contains("PRESSURE_PLATE") ||
-                materialName.equals("TRIPWIRE_HOOK") ||
-                materialName.equals("DAYLIGHT_DETECTOR") ||
-                materialName.equals("TARGET") ||
-                materialName.endsWith("_DOOR") ||
-                materialName.endsWith("_TRAPDOOR") ||
-                materialName.endsWith("_FENCE_GATE") ||
-                materialName.equals("BELL") ||
-                materialName.equals("LECTERN") ||
-                materialName.equals("JUKEBOX") ||
-                materialName.equals("DRAGON_EGG") ||
-                materialName.equals("CAMPFIRE") ||
-                materialName.equals("SOUL_CAMPFIRE");
+        return materialName.contains("BUTTON") || materialName.contains("LEVER") || materialName.contains("PRESSURE_PLATE") || materialName.equals("TRIPWIRE_HOOK") || materialName.equals("DAYLIGHT_DETECTOR") || materialName.equals("TARGET") || materialName.endsWith("_DOOR") || materialName.endsWith("_TRAPDOOR") || materialName.endsWith("_FENCE_GATE") || materialName.equals("BELL") || materialName.equals("LECTERN") || materialName.equals("JUKEBOX") || materialName.equals("DRAGON_EGG") || materialName.equals("CAMPFIRE") || materialName.equals("SOUL_CAMPFIRE");
     }
 
     /**
